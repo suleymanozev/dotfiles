@@ -209,9 +209,8 @@ post_actions += [  # default shell
 
 post_actions += [  # install some essential packages (linux)
     '''#!/bin/bash
-    # Install node, rg, fd locally
+    # Install rg, fd locally
     export PATH="$PATH:$HOME/.local/bin"
-    type node >/dev/null 2>&1 || bin/dotfiles install node
     type rg   >/dev/null 2>&1 || bin/dotfiles install ripgrep
     type fd   >/dev/null 2>&1 || bin/dotfiles install fd
     '''
