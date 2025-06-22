@@ -168,7 +168,7 @@ hi link @lsp.type.operator              @operator
 hi link @lsp.type.string                @string
 hi link @lsp.type.namespace             @module
 hi link @lsp.type.parameter             @variable.parameter
-hi link @lsp.type.decorator             @function
+hi link @lsp.type.decorator             @type.qualifier
 hi link @lsp.type.comment               @comment
 hi link @lsp.type.lifetime              @keyword.storageclass
 
@@ -208,7 +208,8 @@ hi! link @variable.bash            PreProc
 hi!      @variable.parameter.bash  guifg=NONE
 
 " Markdown
-hi!      @markup.raw.block.markdown          guibg=#3a3a3a                  " ```codeblock``` (injection)
+hi!      @markup.raw.block.markdown          guibg=#222222                  " ```codeblock``` (injection)
+hi!      @markup.raw.markdown_inline         guifg=#ff5f87 guibg=#222222    " `code` (injection), fg is from Constant
 hi!      @markup.link.markdown_inline        guifg=#228be6 gui=underline    " link
 hi!      @markup.quote.markdown              guifg=#77ef4f
 
@@ -273,6 +274,9 @@ hi!      @lsp.typemod.class.definition.cpp        guifg=#ffaf00 gui=bold
 
 hi! link @keyword.directive.python             SpecialComment
 
+" import statements (do not link module to Type)
+hi! @module.python              guifg=NONE
+
 " attribute (self.xxx)
 hi! link semshiAttribute        @lsp.type.property.python
 
@@ -295,6 +299,9 @@ hi! @function.method.test.python    guifg=#ffff30 gui=bold
 hi! @lsp.type.namespace.python  guifg=NONE
 
 " }}}
+
+" justfile
+hi!      @command.just                    guifg=white
 
 " Gitcommit
 hi!      @string.special.url.gitcommit    guifg=#df6383 gui=NONE

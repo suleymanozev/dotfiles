@@ -16,6 +16,12 @@ return {
     config = require('config.ui').setup_quickui,
   };
 
+  -- Image
+  Plug '3rd/image.nvim' {
+    event = 'VeryLazy',  -- TODO support startup arguments
+    config = require('config.ui').setup_image,
+  };
+
   -- FZF & Grep
   Plug 'junegunn/fzf' {
     name = 'fzf',
@@ -65,12 +71,12 @@ return {
     branch = 'main',
     version = '>=3.12',
     event = (function()
-      -- If any of the startup argument is a directory,
+      -- If any of the startup argument is a directory (e.g., "nvim ./"),
       -- we don't lazy-load neotree so it can hijack netrw.
-      if vim.tbl_contains(vim.tbl_map(vim.fn.isdirectory, vim.fn.argv()), 1) then return nil
+      if vim.tbl_contains(vim.tbl_map(vim.fn.isdirectory, vim.fn.argv()), 1) then return 'VimEnter'
       else return 'VeryLazy' end
     end)(),
-    cmd = { 'Neotree' },
+    cmd = { 'Neotree' },  -- support "nvim -c Neotree"
     init = function() vim.g.neo_tree_remove_legacy_commands = 1; end,
     config = require('config.neotree').setup_neotree,
   };

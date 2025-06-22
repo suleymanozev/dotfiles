@@ -51,10 +51,11 @@ _template_github_latest() {
   local releases_url="https://api.github.com/repos/${repo}/releases"
   echo -e "${COLOR_YELLOW}Reading: ${COLOR_NONE}$releases_url"
   local download_url=$(\
-    curl -fsSL "$releases_url" 2>/dev/null \
+    curl -fsSL "$releases_url" \
     | python3 -c "\
 import json, sys, fnmatch;
 I = sys.stdin.read()
+assert I, 'empty output: check curl error messages'
 try:
   J = json.loads(I)
 except:
@@ -66,8 +67,8 @@ for asset in J[0]['assets']:
     sys.exit(0)
 sys.stderr.write('ERROR: Cannot find a download matching \'$filename\'.\n'); sys.exit(1)
 ")
-  echo -e "${COLOR_YELLOW}download_url = ${COLOR_NONE}$download_url"
-  test -n "$download_url"
+  echo -e "${COLOR_YELLOW}download_url = ${COLOR_NONE}${download_url:-ERROR}"
+  test -n "${download_url}"
   sleep 0.5
 
   local tmpdir="$DOTFILES_TMPDIR/$name"
@@ -182,7 +183,7 @@ install_ncurses() {
 install_zsh() {
   local ZSH_VER="5.8"
   local TMP_ZSH_DIR="$DOTFILES_TMPDIR/zsh/"; mkdir -p "$TMP_ZSH_DIR"
-  local ZSH_SRC_URL = "https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VER}/zsh-${ZSH_VER}.tar.xz/download"
+  local ZSH_SRC_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VER}/zsh-${ZSH_VER}.tar.xz/download"
 
   wget -nc -O $TMP_ZSH_DIR/zsh.tar.xz "$ZSH_SRC_URL"
   tar xvJf "$TMP_ZSH_DIR/zsh.tar.xz" -C "$TMP_ZSH_DIR" --strip-components 1
@@ -385,15 +386,21 @@ install_neovim() {
   sleep 1;  # allow users to read above comments
 
   local TMP_NVIM_DIR="$DOTFILES_TMPDIR/neovim"; mkdir -p $TMP_NVIM_DIR
-  local NVIM_DOWNLOAD_URL="https://github.com/neovim/neovim/releases/download/${NEOVIM_VERSION}/nvim.appimage"
+  if _version_check "$NEOVIM_VERSION" "v0.10.4"; then
+    # Assume we use x86_64 linux; I never used arm64 linux machines before.
+    NVIM_APPIMAGE="nvim-linux-x86_64.appimage"
+  else
+    NVIM_APPIMAGE="nvim.appimage"
+  fi
+  local NVIM_DOWNLOAD_URL="https://github.com/neovim/neovim/releases/download/${NEOVIM_VERSION}/$NVIM_APPIMAGE"
 
   set -x
   cd $TMP_NVIM_DIR
   wget --backups=1 $NVIM_DOWNLOAD_URL      # always overwrite, having only one backup
 
-  chmod +x nvim.appimage
+  chmod +x "$NVIM_APPIMAGE"
   rm -rf "$TMP_NVIM_DIR/squashfs-root"
-  ./nvim.appimage --appimage-extract >/dev/null   # into ./squashfs-root
+  "./$NVIM_APPIMAGE" --appimage-extract >/dev/null   # into ./squashfs-root
 
   # Install into ~/.local/neovim/ and put a symlink into ~/.local/bin
   local NEOVIM_DEST="$HOME/.local/neovim"
@@ -417,6 +424,10 @@ install_just() {
   cp -v just.1 "$PREFIX/share/man/man1/"
   _which just
   just --version
+
+  # install zsh completions
+  echo -e "\nWriting zsh completion script at: $PREFIX/share/zsh/site-functions/_just"
+  just --completions zsh > "$PREFIX/share/zsh/site-functions/_just"
 }
 
 install_delta() {

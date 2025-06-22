@@ -1,4 +1,5 @@
 # Custom alias and functions for ZSH
+# see also: ~/.zsh/zsh.d/alias.local.zsh
 
 # -------- Utilities ----------
 _version_check() {
@@ -29,6 +30,8 @@ function fpath() {
     local f; for f in `fpath`; do find -L $f -maxdepth 1 -type f -name "$@" | xargs exa; done
   fi
 }
+
+alias j='just'
 
 if (( $+commands[htop] )); then
     alias top='htop'
@@ -155,6 +158,10 @@ function ssh-tmuxa {
 alias sshta='ssh-tmuxa'
 alias ssh-ta='ssh-tmuxa'
 compdef '_hosts' ssh-tmuxa
+
+# skip ssh host key verification
+alias ssh-noverify='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR'
+
 # }}}
 
 # More Git aliases ============================= {{{
@@ -178,20 +185,27 @@ if _version_check $GIT_VERSION "2.0"; then
 else
   alias gha='gh --all'   # git < 1.9 has no --exclude option
 fi
+function ghb() {
+  local branch="HEAD"
+  if [[ "$#" -gt 0 && "$1" != -* ]]; then
+    branch="$1"; shift;
+  fi
+  local merge_base=$(git merge-base "$branch" master)
+  git history --color=always "$merge_base".."$branch" "$@" && \
+    echo "|" && \
+    git history "$merge_base~".."$merge_base"
+}
 
 # git branch: show commit/refs information as well.
 alias gb='git branch -vv'
 
-if (( $+commands[delta] )); then
-    alias gd='git -c core.pager="delta" diff --no-prefix'
-else
-    alias gd='git diff --no-prefix'
-fi
+alias gd='git diff --no-prefix'
 alias gdc='gd --cached --no-prefix'
 alias gds='gd --staged --no-prefix'
 alias gs='git status'
 alias gsu='gs -u'
 alias gu='git pull --autostash'
+alias gmb='git merge-base HEAD master'
 
 function ghad() {
   # Run gha (git history) and refresh if anything in .git/ changes
@@ -257,6 +271,11 @@ function _vim_gv {
 }
 alias gv='_vim_gv'
 alias gva='gv --all'
+
+# .git dir (even if the current working copy is a worktree)
+function gitdir() {
+  realpath "$(git rev-parse --git-dir)"
+}
 
 # cd to $(git-root)
 function cd-git-root() {
@@ -444,7 +463,7 @@ fi
 # df (duf, pydf)
 if (( $+commands[duf] )); then
     # dotfiles install duf
-    alias df="duf"
+    alias df="duf -hide=fuse"
 elif (( $+commands[pydf] )); then
     # pip install --user pydf
     # pydf: a colorized df

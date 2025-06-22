@@ -29,6 +29,7 @@ Thumbs.db
 .ipynb_checkpoints/
 tags
 .vimspector.json
+.cache/
 
 # Build artifacts
 *.dSYM
@@ -41,6 +42,7 @@ tags
 __pycache__
 *.py[cod]
 .condaenv
+.virtual_documents/
 
 # Node
 node_modules/

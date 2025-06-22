@@ -24,4 +24,10 @@ return {
     init = require("config.tabline").init_xtabline,
     config = require("config.tabline").setup_xtabline,
   };
+
+  -- Additional highlight/extmark providers
+  Plug 'MeanderingProgrammer/render-markdown.nvim' {
+    config = require('config.markdown').setup_render,
+    ft = { 'markdown' },  -- lazy-loading
+  };
 }
